@@ -2,24 +2,18 @@
 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useTransition } from 'react';
-import { uploadPDFs } from '@/app/actions/upload';
+import { useActionState, useTransition } from 'react';
+import { processPDFs } from '@/app/actions/upload';
 import { PDFDropzone } from '@/components/pdf-dropzone';
 import { pdfFormSchema, type PDFFormData } from '@/schemas/pdf';
 
 export function PDFUploadForm() {
-  const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{
-    success: boolean;
-    message?: string;
-    error?: string;
-  } | null>(null);
+  const [state, formAction, isPending] = useActionState(processPDFs, null);
+  const [, startTransition] = useTransition();
 
   const {
     control,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting },
+    getValues,
   } = useForm<PDFFormData>({
     resolver: zodResolver(pdfFormSchema),
     defaultValues: {
@@ -27,40 +21,22 @@ export function PDFUploadForm() {
     },
   });
 
-  const isLoading = isSubmitting || isPending;
-
-  const onSubmit = handleSubmit(async (data) => {
-    setResult(null);
-
-    try {
-      const formData = new FormData();
-      data.files.forEach((pdfFile) => {
-        formData.append('files', pdfFile.file);
-      });
-
-      startTransition(async () => {
-        const response = await uploadPDFs(formData);
-
-        setResult({
-          success: response.success,
-          message: response.message || response.error,
-          error: response.error,
-        });
-
-        if (response.success) {
-          reset();
-        }
-      });
-    } catch {
-      setResult({
-        success: false,
-        error: 'An error occurred while uploading files',
-      });
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const { files } = getValues();
+    
+    if (!files || files.length === 0) {
+      return;
     }
-  });
+    
+    startTransition(() => {
+      formAction(files);
+    });
+  };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <Controller
         name="files"
         control={control}
@@ -69,27 +45,22 @@ export function PDFUploadForm() {
             value={field.value}
             onChange={(files) => {
               field.onChange(files);
-
-              if (result) {
-                setResult(null);
-              }
             }}
-            isLoading={isLoading}
-            onUpload={onSubmit}
+            isLoading={isPending}
             error={fieldState.error?.message}
           />
         )}
       />
 
-      {result && (
+      {state && (
         <div
           className={`rounded-lg p-4 text-sm ${
-            result.success
+            state.success
               ? 'bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200'
               : 'bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200'
           }`}
         >
-          {result.message || result.error}
+          {state.message || state.error}
         </div>
       )}
     </form>

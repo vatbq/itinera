@@ -19,7 +19,6 @@ interface PDFDropzoneProps {
   value?: PDFFile[];
   onChange?: (files: PDFFile[]) => void;
   isLoading?: boolean;
-  onUpload?: () => void;
   error?: string;
 }
 
@@ -27,7 +26,6 @@ export function PDFDropzone({
   value = [],
   onChange,
   isLoading = false,
-  onUpload,
   error,
 }: PDFDropzoneProps) {
   const [isDragActive, setIsDragActive] = useState(false);
@@ -141,10 +139,9 @@ export function PDFDropzone({
             Clear All
           </Button>
           <Button
-            type="button"
+            type="submit"
             disabled={value.length === 0 || isLoading}
             className="flex-1"
-            onClick={onUpload}
           >
             {isLoading ? 'Processing...' : `Upload ${value.length} File${value.length !== 1 ? 's' : ''}`}
           </Button>
