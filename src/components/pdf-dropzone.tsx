@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useRef, ChangeEvent, DragEvent } from 'react';
-import { FileUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { formatFileSize } from '@/lib/utils';
-import { PDFFileList } from '@/components/pdf-file-list';
+import { useState, useRef, ChangeEvent, DragEvent } from "react";
+import { FileUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { formatFileSize } from "@/lib/utils";
+import { PDFFileList } from "@/components/pdf-file-list";
 
 export interface PDFFile {
   file: File;
   id: string;
   name: string;
   size: string;
-  status: 'ready' | 'uploading' | 'success' | 'error';
+  status: "ready" | "uploading" | "success" | "error";
 }
 
 interface PDFDropzoneProps {
@@ -34,9 +34,9 @@ export function PDFDropzone({
   const handleDrag = (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === "dragenter" || e.type === "dragover") {
       setIsDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === "dragleave") {
       setIsDragActive(false);
     }
   };
@@ -56,10 +56,12 @@ export function PDFDropzone({
   };
 
   const handleFiles = (filesToAdd: File[]) => {
-    const pdfFiles = filesToAdd.filter((file) => file.type === 'application/pdf');
+    const pdfFiles = filesToAdd.filter(
+      (file) => file.type === "application/pdf",
+    );
 
     if (pdfFiles.length === 0) {
-      alert('Please select PDF files only');
+      alert("Please select PDF files only");
       return;
     }
 
@@ -68,7 +70,7 @@ export function PDFDropzone({
       id: `${file.name}-${Date.now()}`,
       name: file.name,
       size: formatFileSize(file.size),
-      status: 'ready' as const,
+      status: "ready" as const,
     }));
 
     onChange?.([...value, ...newFiles]);
@@ -92,10 +94,10 @@ export function PDFDropzone({
         onDrop={handleDrop}
         onClick={handleClick}
         className={cn(
-          'relative rounded-lg border-2 border-dashed transition-all duration-200 cursor-pointer',
+          "relative rounded-lg border-2 border-dashed transition-all duration-200 cursor-pointer",
           isDragActive
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-card hover:border-primary/50'
+            ? "border-primary bg-primary/5"
+            : "border-border bg-card hover:border-primary/50",
         )}
       >
         <input
@@ -111,8 +113,8 @@ export function PDFDropzone({
         <div className="flex flex-col items-center justify-center gap-3 px-6 py-12 sm:py-16">
           <FileUp
             className={cn(
-              'size-10 transition-colors',
-              isDragActive ? 'text-primary' : 'text-muted-foreground'
+              "size-10 transition-colors",
+              isDragActive ? "text-primary" : "text-muted-foreground",
             )}
           />
           <div className="text-center">
@@ -143,7 +145,9 @@ export function PDFDropzone({
             disabled={value.length === 0 || isLoading}
             className="flex-1"
           >
-            {isLoading ? 'Processing...' : `Upload ${value.length} File${value.length !== 1 ? 's' : ''}`}
+            {isLoading
+              ? "Processing..."
+              : `Upload ${value.length} File${value.length !== 1 ? "s" : ""}`}
           </Button>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { mistral } from "@/lib/mistral";
+import { mistral } from "@/lib/mistral/provider";
 
 export const extractDataFromPDF = async (pdf: File): Promise<string> => {
   const base64Data = await convertFileToBase64(pdf);
@@ -14,7 +14,7 @@ export const extractDataFromPDF = async (pdf: File): Promise<string> => {
     ocrResponse.pages
       ?.map((page) => page.markdown)
       .filter(Boolean)
-      .join('\n\n') || '';
+      .join("\n\n") || "";
 
   return extractedText;
 };
@@ -22,6 +22,6 @@ export const extractDataFromPDF = async (pdf: File): Promise<string> => {
 const convertFileToBase64 = async (file: File): Promise<string> => {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  
+
   return buffer.toString("base64");
-}
+};

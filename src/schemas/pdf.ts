@@ -9,7 +9,7 @@ export const pdfFormSchema = z.object({
         name: z.string(),
         size: z.string(),
         status: z.enum(["ready", "uploading", "success", "error"]),
-      })
+      }),
     )
     .min(1, { message: "Please select at least one PDF file" })
     .max(10, { message: "You can upload a maximum of 10 files at once" })
@@ -22,4 +22,3 @@ export const pdfFormSchema = z.object({
 });
 
 export type PDFFormData = z.infer<typeof pdfFormSchema>;
-

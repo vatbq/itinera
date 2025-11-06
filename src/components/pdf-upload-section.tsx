@@ -1,4 +1,4 @@
-import { PDFUploadForm } from '@/components/pdf-upload-form';
+import { PDFUploadForm } from "@/components/pdf-upload-form";
 
 export async function PDFUploadSection() {
   return (
