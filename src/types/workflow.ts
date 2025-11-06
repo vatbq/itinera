@@ -30,3 +30,16 @@ export const WorkflowRunSchema = z.object({
 });
 
 export type WorkflowRun = z.infer<typeof WorkflowRunSchema>;
+
+export interface ProgressUpdate {
+  type: "progress";
+  step: WorkflowStep;
+}
+
+export interface CompletionUpdate {
+  type: "completion";
+  warnings: string[];
+  markdown: string;
+}
+
+export type WorkflowUpdate = ProgressUpdate | CompletionUpdate;

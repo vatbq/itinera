@@ -1,6 +1,5 @@
 "use server";
 
-import { extractDataFromPDF } from "@/lib/mistral/ocr-processor";
 import { createItinerary } from "@/workflows/create-itinerary";
 import { start } from "workflow/api";
 
@@ -8,6 +7,7 @@ interface ProcessResult {
   success: boolean;
   message?: string;
   error?: string;
+  runId?: string;
   files?: Array<{
     name: string;
     extractedText: string;
@@ -25,7 +25,6 @@ export async function processPDFs(
   _prevState: ProcessResult | null,
   files: FileItem[],
 ): Promise<ProcessResult> {
-  console.log("vale entre");
   const validFiles = files.filter(
     ({ file }) => file.type === "application/pdf",
   );
@@ -42,23 +41,23 @@ export async function processPDFs(
   }
 
   try {
-    const processFiles = validFiles.map(async (file) => {
-      const extractedText = await extractDataFromPDF(file.file);
-
+    const fileDataPromises = validFiles.map(async (item) => {
+      const arrayBuffer = await item.file.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
       return {
-        name: file.name,
-        extractedText,
+        name: item.name,
+        content: base64,
       };
     });
 
-    const processedFiles = await Promise.all(processFiles);
+    const fileData = await Promise.all(fileDataPromises);
 
-    const run = await start(createItinerary, [processedFiles]);
+    const run = await start(createItinerary, [fileData]);
 
     return {
       success: true,
-      message: `Successfully processed ${processedFiles.length} PDF file(s)`,
-      files: processedFiles,
+      message: `Started processing ${fileData.length} PDF file(s)`,
+      runId: run.runId,
     };
   } catch (error) {
     console.error("Error processing PDFs:", error);

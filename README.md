@@ -35,10 +35,9 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-
 ////
 
 Trade offs:
+
 - use new "use workflow" directive, no serializable data, had to do the ocr outside. It's new so I didn't know that.
 - build markdown builder vs ia. prefered the deterministic option.
-

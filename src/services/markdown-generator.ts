@@ -1,7 +1,10 @@
 import { DayRow } from "@/types/trip";
 import { format, parseISO } from "date-fns";
 
-export function buildMarkdownContent(rows: DayRow[], warnings: string[]): string {
+export function buildMarkdownContent(
+  rows: DayRow[],
+  warnings: string[],
+): string {
   let md = "# Your Trip Itinerary\n\n";
   md += `Generated on ${new Date().toLocaleString()}\n\n`;
   md += "---\n\n";
@@ -56,7 +59,6 @@ export function buildMarkdownContent(rows: DayRow[], warnings: string[]): string
 
   return md;
 }
-
 
 function formatColumn(items?: string[]): string {
   if (!items || items.length === 0) {

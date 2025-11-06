@@ -2,7 +2,8 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useActionState, useTransition } from "react";
+import { useActionState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { processPDFs } from "@/app/actions/upload";
 import { PDFDropzone } from "@/components/pdf-dropzone";
 import { pdfFormSchema, type PDFFormData } from "@/schemas/pdf";
@@ -10,6 +11,7 @@ import { pdfFormSchema, type PDFFormData } from "@/schemas/pdf";
 export function PDFUploadForm() {
   const [state, formAction, isPending] = useActionState(processPDFs, null);
   const [, startTransition] = useTransition();
+  const router = useRouter();
 
   const { control, getValues } = useForm<PDFFormData>({
     resolver: zodResolver(pdfFormSchema),
@@ -17,6 +19,13 @@ export function PDFUploadForm() {
       files: [],
     },
   });
+
+  // Navigate to workflow page when runId is available
+  useEffect(() => {
+    if (state?.success && state.runId) {
+      router.push(`/workflow/${state.runId}`);
+    }
+  }, [state, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,15 +58,9 @@ export function PDFUploadForm() {
         )}
       />
 
-      {state && (
-        <div
-          className={`rounded-lg p-4 text-sm ${
-            state.success
-              ? "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200"
-              : "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200"
-          }`}
-        >
-          {state.message || state.error}
+      {state && !state.success && (
+        <div className="rounded-lg p-4 text-sm bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200">
+          {state.error}
         </div>
       )}
     </form>

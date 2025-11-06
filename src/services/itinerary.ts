@@ -41,7 +41,7 @@ export function buildItinerary(trip: Trip): DayRow[] {
   });
 
   return Array.from(dayMap.values()).sort((a, b) =>
-    a.date.localeCompare(b.date)
+    a.date.localeCompare(b.date),
   );
 }
 
@@ -124,7 +124,7 @@ function addHotelToItinerary(hotel: Hotel, dayMap: Map<string, DayRow>): void {
 
 function addFlightToItinerary(
   flight: Flight,
-  dayMap: Map<string, DayRow>
+  dayMap: Map<string, DayRow>,
 ): void {
   if (flight.segments.length === 0) return;
 
@@ -238,18 +238,42 @@ function checkForGaps(rows: DayRow[]): string[] {
     return warnings;
   }
 
+  // Group consecutive days without hotels
+  let gapStart: string | null = null;
+  let gapEnd: string | null = null;
+
+  const flushGap = () => {
+    if (gapStart) {
+      if (gapStart === gapEnd) {
+        warnings.push(`No hotel booked for ${gapStart}`);
+      } else {
+        warnings.push(`No hotel booked for ${gapStart} to ${gapEnd}`);
+      }
+      gapStart = null;
+      gapEnd = null;
+    }
+  };
+
   rows.forEach((row) => {
     const hasHotel = row.hotels && row.hotels.length > 0;
 
     if (!hasHotel) {
-      warnings.push(`No hotel booked for ${row.date}`);
+      if (!gapStart) {
+        gapStart = row.date;
+      }
+      gapEnd = row.date;
+    } else {
+      flushGap();
     }
   });
+
+  // Flush any remaining gap at the end
+  flushGap();
 
   if (rows.length > 1) {
     const totalHotels = rows.reduce(
       (sum, row) => sum + (row.hotels?.length || 0),
-      0
+      0,
     );
     if (totalHotels === 0) {
       warnings.push("No hotel bookings found for multi-day trip");
@@ -291,7 +315,7 @@ function checkFlights(trip: Trip): string[] {
 
       if (missing.length > 0) {
         warnings.push(
-          `Flight #${idx + 1} segment #${segIdx + 1} missing: ${missing.join(", ")}`
+          `Flight #${idx + 1} segment #${segIdx + 1} missing: ${missing.join(", ")}`,
         );
       }
     });
