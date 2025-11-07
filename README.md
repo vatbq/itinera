@@ -2,6 +2,10 @@
 
 A smart travel itinerary processor that converts your travel PDFs (flights, hotels, car rentals) into a consolidated, day-by-day Markdown itinerary with automated validation.
 
+## Demo
+
+Watch a quick demo of Itinera in action: [View Demo on Loom](https://www.loom.com/share/1243895291704088a6cf8ee6e176ea83)
+
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
