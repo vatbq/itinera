@@ -11,6 +11,7 @@ import { buildItinerary, validateItinerary } from "@/services/itinerary";
 import { buildMarkdownContent } from "@/services/markdown-generator";
 import { getWritable } from "workflow";
 import { WorkflowStep, WorkflowUpdate } from "@/types/workflow";
+import { extractDataFromPDF } from "@/lib/mistral/ocr-processor";
 
 interface FileData {
   name: string;
@@ -33,7 +34,6 @@ export async function createItinerary(files: FileData[]): Promise<void> {
     timestamp: Date.now(),
   });
 
-  // Step 1: Extract text from PDF files
   await writeProgressUpdate(writable, {
     name: "EXTRACT_FILES",
     status: "running",
@@ -50,14 +50,16 @@ export async function createItinerary(files: FileData[]): Promise<void> {
     timestamp: Date.now(),
   });
 
-  // Step 2: Process documents (classify and extract fields)
   await writeProgressUpdate(writable, {
     name: "PROCESS_DOCUMENTS",
     status: "running",
+    message: `Processing ${documents.length} document(s)`,
     timestamp: Date.now(),
   });
 
-  const tripDetails = await Promise.all(documents.map((doc) => processDocumentStep(doc, writable)));
+  const tripDetails = await Promise.all(
+    documents.map(processDocumentStep),
+  )
 
   await writeProgressUpdate(writable, {
     name: "PROCESS_DOCUMENTS",
@@ -66,7 +68,6 @@ export async function createItinerary(files: FileData[]): Promise<void> {
     timestamp: Date.now(),
   });
 
-  // Step 3: Merge all trip details
   await writeProgressUpdate(writable, {
     name: "MERGING",
     status: "running",
@@ -110,7 +111,10 @@ export async function createItinerary(files: FileData[]): Promise<void> {
   await writeProgressUpdate(writable, {
     name: "VALIDATE",
     status: "completed",
-    message: warnings.length > 0 ? `Found ${warnings.length} warning(s)` : "No warnings found",
+    message:
+      warnings.length > 0
+        ? `Found ${warnings.length} warning(s)`
+        : "No warnings found",
     timestamp: Date.now(),
   });
 
@@ -136,22 +140,7 @@ export async function createItinerary(files: FileData[]): Promise<void> {
 async function extractPDFStep(fileData: FileData): Promise<Document> {
   "use step";
 
-  // Use the base64 content directly with the OCR processor
-  const { mistral } = await import("@/lib/mistral/provider");
-  
-  const ocrResponse = await mistral.ocr.process({
-    model: "mistral-ocr-latest",
-    document: {
-      type: "document_url",
-      documentUrl: "data:application/pdf;base64," + fileData.content,
-    },
-  });
-
-  const extractedText =
-    ocrResponse.pages
-      ?.map((page) => page.markdown)
-      .filter(Boolean)
-      .join("\n\n") || "";
+  const extractedText = await extractDataFromPDF(fileData.content);
 
   return {
     name: fileData.name,
@@ -161,27 +150,14 @@ async function extractPDFStep(fileData: FileData): Promise<Document> {
 
 async function processDocumentStep(
   doc: Document,
-  writable: WritableStream<WorkflowUpdate>,
 ): Promise<Flight | Hotel | Car> {
   "use step";
-
-  await writeProgressUpdate(writable, {
-    name: `Processing document ${doc.name}`,
-    status: "running",
-    timestamp: Date.now(),
-  });
 
   const docType = await classifyDoc(doc.extractedText);
 
   const extracted = await extractFields(doc.extractedText, docType);
 
   const normalized = normalizeRecord(extracted, docType);
-
-  await writeProgressUpdate(writable, {
-    name: `Processing document ${doc.name}`,
-    status: "completed",
-    timestamp: Date.now(),
-  });
 
   return normalized;
 }
@@ -237,7 +213,7 @@ async function writeProgressUpdate(
   step: WorkflowStep,
 ) {
   "use step";
-
+  
   const writer = writable.getWriter();
 
   await writer.write({
@@ -262,4 +238,6 @@ async function writeCompletionUpdate(
     warnings,
     markdown,
   });
+
+  writer.releaseLock();
 }

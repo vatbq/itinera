@@ -131,7 +131,7 @@ export function PDFDropzone({
       <PDFFileList files={value} onRemove={removeFile} isLoading={isLoading} />
 
       {value.length > 0 && (
-        <div className="mt-4 flex gap-2 pt-4 border-t">
+        <div className="mt-4 flex justify-between gap-2 pt-4 border-t">
           <Button
             type="button"
             onClick={() => onChange?.([])}
@@ -142,12 +142,12 @@ export function PDFDropzone({
           </Button>
           <Button
             type="submit"
+            variant="outline"
             disabled={value.length === 0 || isLoading}
-            className="flex-1"
           >
             {isLoading
               ? "Processing..."
-              : `Upload ${value.length} File${value.length !== 1 ? "s" : ""}`}
+              : "Generate Itinerary"}
           </Button>
         </div>
       )}

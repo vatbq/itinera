@@ -11,13 +11,12 @@ export default function WorkflowPage() {
   const [markdown, setMarkdown] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-100 transition-colors"
           >
             <svg
               className="h-4 w-4"
@@ -36,21 +35,19 @@ export default function WorkflowPage() {
           </Link>
         </div>
 
-        {/* Workflow Progress */}
         <WorkflowProgress runId={runId} onComplete={(md) => setMarkdown(md)} />
 
-        {/* Markdown Result */}
         {markdown && (
-          <div className="mt-8 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6">
+          <div className="mt-8 rounded-lg border border-gray-800 bg-black/50 backdrop-blur-sm p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-xl font-semibold text-gray-100">
                 Your Itinerary
               </h2>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(markdown);
                 }}
-                className="inline-flex items-center gap-2 rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="inline-flex items-center gap-2 rounded-md bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors"
               >
                 <svg
                   className="h-4 w-4"
@@ -68,8 +65,8 @@ export default function WorkflowPage() {
                 Copy
               </button>
             </div>
-            <div className="prose dark:prose-invert max-w-none">
-              <pre className="whitespace-pre-wrap text-sm bg-gray-50 dark:bg-gray-900 rounded-md p-4 overflow-x-auto">
+            <div className="prose prose-invert max-w-none">
+              <pre className="whitespace-pre-wrap text-sm bg-gray-900 rounded-md p-4 overflow-x-auto">
                 {markdown}
               </pre>
             </div>

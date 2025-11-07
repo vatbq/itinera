@@ -15,10 +15,9 @@ export async function GET(
   }
 
   try {
-    const run = getRun(id);
+    const run = getRun<string>(id);
     const stream = run.getReadable();
 
-    // Transform the workflow stream to SSE format
     const encoder = new TextEncoder();
     const transformedStream = new ReadableStream({
       async start(controller) {
@@ -33,7 +32,6 @@ export async function GET(
               break;
             }
 
-            // Send as SSE
             const data = `data: ${JSON.stringify(value)}\n\n`;
             controller.enqueue(encoder.encode(data));
           }

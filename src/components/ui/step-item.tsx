@@ -11,10 +11,9 @@ const STEP_LABELS: Record<string, string> = {
   BUILD_MARKDOWN: "Generating final output",
 };
 
-
 export function StepItem({ step }: { step: WorkflowStep }) {
   const label = STEP_LABELS[step.name] || step.name;
-  
+
   return (
     <div className="flex items-start gap-3">
       <StepIcon status={step.status} />

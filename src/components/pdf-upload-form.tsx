@@ -20,7 +20,6 @@ export function PDFUploadForm() {
     },
   });
 
-  // Navigate to workflow page when runId is available
   useEffect(() => {
     if (state?.success && state.runId) {
       router.push(`/workflow/${state.runId}`);
